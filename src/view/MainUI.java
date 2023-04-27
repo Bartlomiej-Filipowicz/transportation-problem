@@ -1,7 +1,6 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -43,10 +42,9 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
     private JPanel buttonPanel;
     private JLabel nameLabel;
     private JLabel timeLabel;
-    private JLabel prevLabel;
-    private JTextField nameTextField;
-    private JTextField timeTextField;
-    private JTextField prevTextField;
+    private JTextField delivererTextField;
+    private JTextField receiverTextField;
+    private JTextField cell1TextField;
     private JButton generateButton;
     private JButton addRowButton;
 
@@ -99,41 +97,37 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
         inputTable.setFont(new Font(fontFamily, Font.PLAIN, fontSize-5));
         (inputTable.getTableHeader()).setFont(new Font(fontFamily, Font.PLAIN, fontSize));
         inputTable.setRowHeight(40);
-        inputTable.setModel(new javax.swing.table.DefaultTableModel(
+//        inputTable.setModel(new javax.swing.table.DefaultTableModel(5,4)); // num of rows and cols
+        /*inputTable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object [][] {},
-                new String [] {"Nazwa", "Czas trwania", "Poprzednik"}));
-        inputTable.setRowSelectionAllowed(false);
-        inputTable.setCellSelectionEnabled(false);
-        inputTable.setColumnSelectionAllowed(false);
+                new String [] {"Nazwa", "Czas trwania", "Poprzednik"}));*/
+        inputTable.setRowSelectionAllowed(true);
+        inputTable.setCellSelectionEnabled(true);
+        inputTable.setColumnSelectionAllowed(true);
         JScrollPane sp = new JScrollPane(inputTable);
         tablePanel.add(sp, BorderLayout.NORTH);
 
         buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(4, 2));
-        nameLabel = new JLabel("Nazwa:");
-        timeLabel = new JLabel("Czas trwania:");
-        prevLabel = new JLabel("Poprzednik:");
+        nameLabel = new JLabel("Dostawcy:");
+        timeLabel = new JLabel("Odbiorcy:");
         nameLabel.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
         timeLabel.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-        prevLabel.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-        nameTextField = new JTextField();
-        nameTextField.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-        timeTextField = new JTextField();
-        timeTextField.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-        prevTextField = new JTextField();
-        prevTextField.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
+        delivererTextField = new JTextField();
+        delivererTextField.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
+        receiverTextField = new JTextField();
+        receiverTextField.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
+        cell1TextField = new JTextField();
         buttonPanel.add(nameLabel);
-        buttonPanel.add(nameTextField);
+        buttonPanel.add(delivererTextField);
         buttonPanel.add(timeLabel);
-        buttonPanel.add(timeTextField);
-        buttonPanel.add(prevLabel);
-        buttonPanel.add(prevTextField);
+        buttonPanel.add(receiverTextField);
         generateButton = new JButton("Generuj");
         generateButton.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
         generateButton.setActionCommand(COMMAND_GENERATE);
         generateButton.addActionListener(this);
         buttonPanel.add(generateButton);
-        addRowButton = new JButton("Dodaj wiersz");
+        addRowButton = new JButton("Generuj tab");
         addRowButton.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
         addRowButton.setActionCommand(COMMAND_ADD_ROW);
         addRowButton.addActionListener(this);
@@ -178,29 +172,37 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
             case COMMAND_ADD_ROW:
                 System.out.println("Dodaj wiersz");
                 // https://www.youtube.com/watch?v=F0Zq2fAUpXg
-                DefaultTableModel model = (DefaultTableModel) inputTable.getModel();
-                model.addRow(new Object[]{nameTextField.getText(), timeTextField.getText(), prevTextField.getText()});
+                //DefaultTableModel model = (DefaultTableModel) inputTable.getModel();
+                //model.addRow(new Object[]{nameTextField.getText(), timeTextField.getText(), prevTextField.getText()});
+
+                // get value from a table cell
+//                System.out.println(inputTable.getModel().getValueAt(1,0));
+//                System.out.println("tranquillo");
+
+                // generate a table based on input
+                inputTable.setModel(new javax.swing.table.DefaultTableModel(
+                        Integer.parseInt(delivererTextField.getText()),
+                        Integer.parseInt(receiverTextField.getText()))); // num of rows and cols
 
                 // add new row
                 // 1. must be comma separated
                 // 2. suppose letters from ASCII, until the range
-                tasks.add(new Task(nameTextField.getText(), Integer.parseInt(timeTextField.getText())));
-                int intValueThis = nameTextField.getText().charAt(0) - 65;
-                if (!(Objects.equals(prevTextField.getText(), "-"))) {
-                    String[] connections = prevTextField.getText().split(",");
-                    for (var value : connections) {
-                        int intValue = value.charAt(0) - 65;
-                        System.out.println(">>" + intValue + "<<");
-                        tasks.get(intValueThis).addDependency(intValue);
-                        tasks.get(intValue).addDependent(intValueThis);
-                    }
-                }
-                System.out.println("Added: " + tasks.get(tasks.size()-1).getName() + " " + tasks.get(tasks.size()-1).getTime());
+//                tasks.add(new Task(delivererTextField.getText(), Integer.parseInt(receiverTextField.getText())));
+//                int intValueThis = delivererTextField.getText().charAt(0) - 65;
+//                if (!(Objects.equals(prevTextField.getText(), "-"))) {
+//                    String[] connections = prevTextField.getText().split(",");
+//                    for (var value : connections) {
+//                        int intValue = value.charAt(0) - 65;
+//                        System.out.println(">>" + intValue + "<<");
+//                        tasks.get(intValueThis).addDependency(intValue);
+//                        tasks.get(intValue).addDependent(intValueThis);
+//                    }
+//                }
+//                System.out.println("Added: " + tasks.get(tasks.size()-1).getName() + " " + tasks.get(tasks.size()-1).getTime());
                 //System.out.println("tasks.get(" + Integer.parseInt(nameTextField.getText()) - 'A');// + ".addDependency(" + Integer.parseInt(value) - 'A'));
 
-                nameTextField.setText("");
-                timeTextField.setText("");
-                prevTextField.setText("");
+                delivererTextField.setText("");
+                receiverTextField.setText("");
                 break;
             case COMMAND_OPEN_PAINT:
                 try {
