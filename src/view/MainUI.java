@@ -55,8 +55,11 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
     private JFrame frame;
 
+    private Integer rows;
+    private Integer cols;
+
     public MainUI() throws IOException {
-        frame = new JFrame("CPM");
+        frame = new JFrame("Transportation Problem");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLayout(new BorderLayout());
@@ -122,7 +125,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
         buttonPanel.add(delivererTextField);
         buttonPanel.add(timeLabel);
         buttonPanel.add(receiverTextField);
-        generateButton = new JButton("Generuj");
+        generateButton = new JButton("Start alg");
         generateButton.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
         generateButton.setActionCommand(COMMAND_GENERATE);
         generateButton.addActionListener(this);
@@ -180,9 +183,9 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 //                System.out.println("tranquillo");
 
                 // generate a table based on input
-                inputTable.setModel(new javax.swing.table.DefaultTableModel(
-                        Integer.parseInt(delivererTextField.getText()),
-                        Integer.parseInt(receiverTextField.getText()))); // num of rows and cols
+                rows = Integer.parseInt(delivererTextField.getText());
+                cols = Integer.parseInt(receiverTextField.getText());
+                inputTable.setModel(new javax.swing.table.DefaultTableModel(rows, cols)); // num of rows and cols
 
                 // add new row
                 // 1. must be comma separated
@@ -213,11 +216,23 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 break;
             case COMMAND_GENERATE:
                 System.out.println("Generuj");
-                timesInfoLabel.setVisible(true);
-                openInPaintButton.setVisible(true);
-                showCriticalPathCheckBox.setEnabled(true);
+//                timesInfoLabel.setVisible(true);
+//                openInPaintButton.setVisible(true);
+//                showCriticalPathCheckBox.setEnabled(true);
 
+                // get values from table cells
+                //!!!! ALL VALUES IN A TABLE MUST APPEAR AS BIG
+                ArrayList<ArrayList<Integer>> costs = new ArrayList<ArrayList<Integer>>();
+                for(int i = 0; i < rows; i++) costs.add(new ArrayList<Integer>());
 
+                for(int i = 0; i < rows; i++){
+                    for(int j = 0; j < cols; j++){
+                        costs.get(i).add(Integer.parseInt((String) inputTable.getModel().getValueAt(i,j)));
+                    }
+                }
+
+                // print 2D array of costs
+                System.out.println(costs);
 /*
                 ArrayList<Task> tasks = new ArrayList<>();
                 tasks.add(new Task("A", 4));
@@ -232,7 +247,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 tasks.get(0).addDependent(3); // A
                 tasks.get(2).addDependent(3); // A
  */
-
+/*
                 cpm = cpm.update(tasks.size(), tasks);
                 criticalPath = cpm.runCPM();
                 cpm.printResults();
@@ -241,7 +256,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
                 var temp = new CPMGraphGenerator();
                 temp.generate(tasks, criticalPath, notch * 0.05f);
-
+*/
                 //System.out.println(imgScrollPane.getGraphics());
 //                if (counter == 0) {
 //                    imgScrollPane.setVisible(false);
@@ -256,7 +271,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 //frame.add(imgPanel, BorderLayout.WEST);
                 //imgScrollPane.setVisible(true);
                 //paintI
-                imgPanel.setImage("img\\cpm-graph.png");
+                //imgPanel.setImage("img\\cpm-graph.png");
 
                 break;
             default:
