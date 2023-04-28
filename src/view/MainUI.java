@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -167,7 +168,6 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
     }
 
 
-
     public void actionPerformed(final ActionEvent e) {
         String command = e.getActionCommand();
 
@@ -182,10 +182,27 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 //                System.out.println(inputTable.getModel().getValueAt(1,0));
 //                System.out.println("tranquillo");
 
+
+
+
                 // generate a table based on input
-                rows = Integer.parseInt(delivererTextField.getText());
-                cols = Integer.parseInt(receiverTextField.getText());
-                inputTable.setModel(new javax.swing.table.DefaultTableModel(rows, cols)); // num of rows and cols
+                rows = Integer.parseInt(delivererTextField.getText())+ 1;
+                cols = Integer.parseInt(receiverTextField.getText()) + 2;
+
+                String[] columns = new String[cols];
+                columns[0] = "-";
+                for(int i = 2; i <= cols - 1; i++) columns[i-1] = "O"+(i-1);
+                columns[cols-1] = "podaz";
+
+
+                DefaultTableModel model = new javax.swing.table.DefaultTableModel(rows, cols);
+                model.setColumnIdentifiers(columns);
+                inputTable.setModel(model); // num of rows and cols
+
+                for(int i = 0; i < rows - 1; i++) model.setValueAt("D"+(i+1), i,0);
+                model.setValueAt("popyt", rows - 1, 0);
+
+                model.setValueAt("-",rows- 1, cols - 1);
 
                 // add new row
                 // 1. must be comma separated
@@ -223,16 +240,36 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 // get values from table cells
                 //!!!! ALL VALUES IN A TABLE MUST APPEAR AS BIG
                 ArrayList<ArrayList<Integer>> costs = new ArrayList<ArrayList<Integer>>();
-                for(int i = 0; i < rows; i++) costs.add(new ArrayList<Integer>());
+                for(int i = 0; i < rows - 1; i++) costs.add(new ArrayList<Integer>());
 
-                for(int i = 0; i < rows; i++){
-                    for(int j = 0; j < cols; j++){
+                for(int i = 0; i < rows - 1; i++){
+                    for(int j = 1; j < cols - 1; j++){
                         costs.get(i).add(Integer.parseInt((String) inputTable.getModel().getValueAt(i,j)));
                     }
                 }
 
+                // get popyt
+                var popyt = new ArrayList<Integer>();
+                for(int j = 1; j < cols - 1; j++) popyt.add(Integer.parseInt((String) inputTable.getModel().getValueAt(rows - 1,j)));
+
+                // get podaz
+                var podaz = new ArrayList<Integer>();
+                for(int i = 0; i < rows - 1; i++) podaz.add(Integer.parseInt((String) inputTable.getModel().getValueAt(i,cols - 1)));
+
+                // suma popyt
+                int sum_popyt = 0;
+                for(var it : popyt) sum_popyt += it;
+
+                // suma podaz
+                int sum_podaz = 0;
+                for(var it : podaz) sum_podaz += it;
+
                 // print 2D array of costs
                 System.out.println(costs);
+                System.out.println(popyt);
+                System.out.println(podaz);
+                System.out.println("podaz sum: " + sum_podaz);
+                System.out.println("popyt sum: " + sum_popyt);
 /*
                 ArrayList<Task> tasks = new ArrayList<>();
                 tasks.add(new Task("A", 4));
