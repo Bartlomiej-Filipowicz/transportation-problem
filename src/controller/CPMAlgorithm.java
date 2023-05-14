@@ -14,6 +14,9 @@ public class CPMAlgorithm {
     private int time;
     private String criticalPath;
 
+    private ArrayList<Integer> popyt;
+    private ArrayList<Integer> podaz;
+
     public CPMAlgorithm() {
         /*
         this.earliestStart = new int[numTasks+1]; // to wpisuje
@@ -25,7 +28,10 @@ public class CPMAlgorithm {
          */
     }
 
-    public CPMAlgorithm update(int numTasks, List<Task> tasks) {
+    public CPMAlgorithm update(ArrayList<Integer> podaz, ArrayList<Integer> popyt) {
+        this.podaz = podaz;
+        this.popyt = popyt;
+        /*
         this.numTasks = numTasks;
         this.tasks = tasks; // LISTA zadan
         this.earliestStart = new int[numTasks+1]; // to wpisuje
@@ -34,11 +40,37 @@ public class CPMAlgorithm {
         this.latestFinish = new int[numTasks+1];
         this.time = -1;
         this.criticalPath = "";
+        */
         return this;
     }
 
 
-    public String runCPM() {
+    public void runTP() {
+
+        int rowNum = podaz.size();
+        int colNum = popyt.size();
+        int minim,colStart = 0;
+        ArrayList<ArrayList<Integer>> northWestTable = new ArrayList<ArrayList<Integer>>();
+        for(int i = 0; i < rowNum; i++){
+            northWestTable.add(new ArrayList<Integer>());
+            for(int j = 0; j < colNum; j++) northWestTable.get(i).add(0);
+        }
+
+        for(int i = 0; i < rowNum; i++){
+            for(int j = colStart; j < colNum; j++){
+                minim = Math.min(podaz.get(i),popyt.get(j));
+                podaz.set(i,podaz.get(i)-minim);
+                popyt.set(j,popyt.get(j)-minim);
+                northWestTable.get(i).set(j,minim);
+
+                if(podaz.get(i) == 0){
+                    colStart = j;
+                    break;
+                }
+            }
+        }
+        System.out.println(northWestTable);
+        /*
         // Step 0: check if there are nodes/activities with 0 next
         if (!tasks.get(tasks.size()-1).getName().equals("")) {
             tasks.add(new Task("", 0));
@@ -106,6 +138,7 @@ public class CPMAlgorithm {
             }
         }
         return this.criticalPath;
+        */
     }
 
     public void printResults() {

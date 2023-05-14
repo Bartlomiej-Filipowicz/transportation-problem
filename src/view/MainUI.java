@@ -270,6 +270,9 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 System.out.println(podaz);
                 System.out.println("podaz sum: " + sum_podaz);
                 System.out.println("popyt sum: " + sum_popyt);
+
+                cpm = cpm.update(podaz,popyt);
+                cpm.runTP();
 /*
                 ArrayList<Task> tasks = new ArrayList<>();
                 tasks.add(new Task("A", 4));
