@@ -16,6 +16,7 @@ public class CPMAlgorithm {
 
     private ArrayList<Integer> popyt;
     private ArrayList<Integer> podaz;
+    private ArrayList<ArrayList<Integer>> costs;
 
     public CPMAlgorithm() {
         /*
@@ -28,9 +29,10 @@ public class CPMAlgorithm {
          */
     }
 
-    public CPMAlgorithm update(ArrayList<Integer> podaz, ArrayList<Integer> popyt) {
+    public CPMAlgorithm update(ArrayList<Integer> podaz, ArrayList<Integer> popyt, ArrayList<ArrayList<Integer>> costs) {
         this.podaz = podaz;
         this.popyt = popyt;
+        this.costs = costs;
         /*
         this.numTasks = numTasks;
         this.tasks = tasks; // LISTA zadan
@@ -47,13 +49,29 @@ public class CPMAlgorithm {
 
     public void runTP() {
 
-        int rowNum = podaz.size();
-        int colNum = popyt.size();
+        int rowNum = podaz.size(); // it's equivalent to costs array size
+        int colNum = popyt.size(); // it's equivalent to costs array size
         int minim,colStart = 0;
         ArrayList<ArrayList<Integer>> northWestTable = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Boolean>> onPath = new ArrayList<ArrayList<Boolean>>();
+        ArrayList<Integer> u = new ArrayList<Integer>(); // u -> w pionie
+        ArrayList<Integer> v = new ArrayList<Integer>(); // v -> w poziomie
+        ArrayList<ArrayList<Integer>> delta = new ArrayList<ArrayList<Integer>>();
+
+
         for(int i = 0; i < rowNum; i++){
             northWestTable.add(new ArrayList<Integer>());
             for(int j = 0; j < colNum; j++) northWestTable.get(i).add(0);
+        }
+
+        for(int i = 0; i < rowNum; i++){
+            onPath.add(new ArrayList<Boolean>());
+            for(int j = 0; j < colNum; j++) onPath.get(i).add(false);
+        }
+
+        for(int i = 0; i < rowNum; i++){
+            delta.add(new ArrayList<Integer>());
+            for(int j = 0; j < colNum; j++) delta.get(i).add(Integer.MIN_VALUE);
         }
 
         for(int i = 0; i < rowNum; i++){
@@ -62,6 +80,7 @@ public class CPMAlgorithm {
                 podaz.set(i,podaz.get(i)-minim);
                 popyt.set(j,popyt.get(j)-minim);
                 northWestTable.get(i).set(j,minim);
+                onPath.get(i).set(j,true);
 
                 if(podaz.get(i) == 0){
                     colStart = j;
@@ -70,6 +89,41 @@ public class CPMAlgorithm {
             }
         }
         System.out.println(northWestTable);
+        u.add(0);
+        for(int i = 0; i < rowNum; i++){
+            for(int j = 0; j < colNum; j++)
+                if(onPath.get(i).get(j)){
+                    if(u.size() == i + 1){
+                        v.add(costs.get(i).get(j) - u.get(i));
+                    }
+                    else{
+                        u.add(costs.get(i).get(j) - v.get(j));
+                    }
+                }
+        }
+        System.out.println(u);
+        System.out.println(v);
+
+        for(int i = 0; i < rowNum; i++){
+            for(int j = 0; j < colNum; j++)
+                if(!onPath.get(i).get(j)){
+                    delta.get(i).set(j, u.get(i) + v.get(j) - costs.get(i).get(j));
+                }
+        }
+        System.out.println(delta);
+        int maks_delta = Integer.MIN_VALUE;
+        int pos_i = 0, pos_j = 0;
+        for(int i = 0; i < rowNum; i++){
+            for(int j = 0; j < colNum; j++){
+                if(delta.get(i).get(j) > maks_delta){
+                    maks_delta = delta.get(i).get(j);
+                    pos_i = i;
+                    pos_j = j;
+                }
+            }
+        }
+        System.out.println(maks_delta);
+        System.out.println(pos_i + "  " + pos_j);
         /*
         // Step 0: check if there are nodes/activities with 0 next
         if (!tasks.get(tasks.size()-1).getName().equals("")) {

@@ -264,6 +264,19 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 int sum_podaz = 0;
                 for(var it : podaz) sum_podaz += it;
 
+                // popyt wiekszy od podazy
+                if(sum_popyt > sum_podaz){
+                    podaz.add(sum_popyt-sum_podaz);
+                    costs.add(new  ArrayList<Integer>());
+                    for(int i = 0; i < costs.get(0).size();i++) costs.get(costs.size()-1).add(0);
+                }
+
+                // podaz wieksza od popytu
+                if(sum_podaz > sum_popyt){
+                    popyt.add(sum_podaz-sum_popyt);
+                    for(int i = 0; i < costs.size();i++) costs.get(i).add(0);
+                }
+
                 // print 2D array of costs
                 System.out.println(costs);
                 System.out.println(popyt);
@@ -271,7 +284,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 System.out.println("podaz sum: " + sum_podaz);
                 System.out.println("popyt sum: " + sum_popyt);
 
-                cpm = cpm.update(podaz,popyt);
+                cpm = cpm.update(podaz,popyt,costs);
                 cpm.runTP();
 /*
                 ArrayList<Task> tasks = new ArrayList<>();
