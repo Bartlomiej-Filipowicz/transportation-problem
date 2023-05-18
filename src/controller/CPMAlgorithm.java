@@ -124,6 +124,35 @@ public class CPMAlgorithm {
         }
         System.out.println(maks_delta);
         System.out.println(pos_i + "  " + pos_j);
+        if(maks_delta <= 0){
+            // the optimal solution found
+            return;
+        }
+        int start_up = -1; // starting position of a cycle in upper direction
+        // looking for a cycle in 4 directions:
+        // UP
+        for(int i = pos_i; i >= 0; i--){
+            if(onPath.get(i).get(pos_j)){
+                start_up = i;
+                break;
+            }
+        }
+        if(start_up >= 0){
+            int counter = 1; // odd & even inside a cycle
+            int i_loc = start_up, j_loc = pos_j; // iterators
+            int min_even = Integer.MAX_VALUE;
+            while (true){
+                counter++;
+                if(counter%2 == 0){
+                    min_even = Math.min(min_even, northWestTable.get(i_loc).get(j_loc));
+                }
+                if(onPath.get(i_loc + 1).get(j_loc)) i_loc += 1;
+                else j_loc += 1;
+            }
+        }
+        else{
+            //code
+        }
         /*
         // Step 0: check if there are nodes/activities with 0 next
         if (!tasks.get(tasks.size()-1).getName().equals("")) {
