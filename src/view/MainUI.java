@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import controller.CPMAlgorithm;
 import controller.CPMGraphGenerator;
@@ -35,11 +34,12 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
     private JLabel tmpImg;
 
     private JPanel mainPanel;
-    private ImagePanel imgPanel;
+    private JPanel leftPanel;
     private JPanel sidePanel;
 
     private JPanel tablePanel;
     private JTable inputTable;
+    private JTable outputTable;
     private JPanel buttonPanel;
     private JLabel nameLabel;
     private JLabel timeLabel;
@@ -58,6 +58,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
     private Integer rows;
     private Integer cols;
+    private String[] columns;
 
     public MainUI() throws IOException {
         frame = new JFrame("Transportation Problem");
@@ -65,11 +66,12 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
         frame.setResizable(false);
         frame.setLayout(new BorderLayout());
 
-        initImagePanel();
-        frame.add(imgPanel, BorderLayout.WEST);
+        initLeftPanel();
+        initLeftTablePanel();
+        frame.add(leftPanel, BorderLayout.WEST);
         initSidePanel();
         initTablePanel();
-        initCriticalPathPanel();
+        //initCriticalPathPanel();
         frame.add(sidePanel, BorderLayout.EAST);
 
         frame.pack();
@@ -78,24 +80,41 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
     }
 
-    private void initImagePanel() throws IOException {
+    private void initLeftPanel() throws IOException {
         //final JLabel tmpImg = new JLabel(new ImageIcon(new FileUtil().openFromFile("img\\test_img.png")));
         //tmpImg.setVisible(false);
-        imgPanel = new ImagePanel("img\\start_img.png");
-        imgPanel.setPreferredSize(new Dimension(750, 700));
-        imgPanel.addMouseWheelListener(this);
+        //leftPanel = new ImagePanel("img\\start_img.png");
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new BorderLayout()); // new
+        leftPanel.setPreferredSize(new Dimension(625, 700));
+        //leftPanel.addMouseWheelListener(this);
+    }
+
+    private void initLeftTablePanel(){
+        outputTable = new JTable();
+        outputTable.setFont(new Font(fontFamily, Font.PLAIN, fontSize-5));
+        (outputTable.getTableHeader()).setFont(new Font(fontFamily, Font.PLAIN, fontSize));
+        outputTable.setRowHeight(40);
+        outputTable.setRowSelectionAllowed(true);
+        outputTable.setCellSelectionEnabled(true);
+        outputTable.setColumnSelectionAllowed(true);
+        JScrollPane spo = new JScrollPane(outputTable);
+        spo.setPreferredSize(new Dimension(625, 700));
+        leftPanel.add(spo, BorderLayout.NORTH);
     }
 
     private void initSidePanel() {
         sidePanel = new JPanel();
-        sidePanel.setLayout(new GridLayout(2,1));
-        sidePanel.setPreferredSize(new Dimension(500, 700));
+        //sidePanel.setLayout(new GridLayout(2,1)); // rows 2
+        sidePanel.setLayout(new BorderLayout());
+        sidePanel.setPreferredSize(new Dimension(625, 700));
     }
 
     private void initTablePanel() {
         tablePanel = new JPanel();
-        tablePanel.setLayout(new GridLayout(2,1)); //?
-        tablePanel.setPreferredSize(new Dimension(500, 500));
+        //tablePanel.setLayout(new GridLayout(2,1)); //?
+        tablePanel.setLayout(new BorderLayout());
+        tablePanel.setPreferredSize(new Dimension(625, 700)); //new Dimension(500, 500)
 
         inputTable = new JTable();
         inputTable.setFont(new Font(fontFamily, Font.PLAIN, fontSize-5));
@@ -109,10 +128,12 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
         inputTable.setCellSelectionEnabled(true);
         inputTable.setColumnSelectionAllowed(true);
         JScrollPane sp = new JScrollPane(inputTable);
+        sp.setPreferredSize(new Dimension(625, 514));
         tablePanel.add(sp, BorderLayout.NORTH);
 
         buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(4, 2));
+        buttonPanel.setLayout(new GridLayout(3, 2)); //new GridLayout(4, 2)
+        buttonPanel.setPreferredSize(new Dimension(625, 186));
         nameLabel = new JLabel("Dostawcy:");
         timeLabel = new JLabel("Odbiorcy:");
         nameLabel.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
@@ -143,7 +164,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
     private void initCriticalPathPanel() {
         criticalPathPanel = new JPanel(new GridLayout(3, 1));
-        criticalPathPanel.setPreferredSize(new Dimension(500, 200));
+        criticalPathPanel.setPreferredSize(new Dimension(500, 10));
 
         showCriticalPathCheckBox = new JCheckBox("Pokaz sciezke krytyczna na grafie");
         showCriticalPathCheckBox.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
@@ -189,7 +210,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 rows = Integer.parseInt(delivererTextField.getText())+ 1;
                 cols = Integer.parseInt(receiverTextField.getText()) + 2;
 
-                String[] columns = new String[cols];
+                columns = new String[cols];
                 columns[0] = "-";
                 for(int i = 2; i <= cols - 1; i++) columns[i-1] = "O"+(i-1);
                 columns[cols-1] = "podaz";
@@ -284,8 +305,31 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
                 System.out.println("podaz sum: " + sum_podaz);
                 System.out.println("popyt sum: " + sum_popyt);
 
+                int[][] result = new int[podaz.size()][popyt.size()];
+
                 cpm = cpm.update(podaz,popyt,costs);
-                cpm.runTP();
+                result = cpm.runTP();
+
+                // display output table
+                DefaultTableModel outmodel = new javax.swing.table.DefaultTableModel(rows, cols);
+                outmodel.setColumnIdentifiers(columns);
+                outputTable.setModel(outmodel); // num of rows and cols
+
+                for(int i = 0; i < rows - 1; i++) outmodel.setValueAt("D"+(i+1), i,0);
+                outmodel.setValueAt("popyt", rows - 1, 0);
+
+                for(int i = 0; i < rows - 1; i++)
+                    for(int j = 1; j < cols - 1; j++)
+                        outmodel.setValueAt(result[i][j-1],i,j);
+
+                // set popyt
+                for(int j = 1; j < cols - 1; j++) outmodel.setValueAt(popyt.get(j - 1), rows - 1, j);
+
+                // set podaz
+                for(int i = 0; i < rows - 1; i++) outmodel.setValueAt(podaz.get(i),i,cols - 1);
+
+                // display final total cost
+                outmodel.setValueAt(result[podaz.size()][0],rows- 1, cols - 1);
 /*
                 ArrayList<Task> tasks = new ArrayList<>();
                 tasks.add(new Task("A", 4));
@@ -348,7 +392,7 @@ public class MainUI implements ActionListener, MouseWheelListener/*, KeyListener
 
         var temp = new CPMGraphGenerator();
         temp.generate(tasks, criticalPath, notch * 0.05f);
-        imgPanel.setImage("img\\cpm-graph.png");
+        //leftPanel.setImage("img\\cpm-graph.png");
 
         //System.out.println(imgScrollPane.getGraphics());
 //        if (counter == 1) {

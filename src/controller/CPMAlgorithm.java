@@ -192,9 +192,10 @@ public class CPMAlgorithm {
         }
     }
 
-    static void printResult(String filename) {
+    static int[][] printResult(String filename) {
         System.out.printf("Optimal solution %s%n%n", filename);
         double totalCosts = 0;
+        int[][] result = new int[supply.length+1][demand.length]; // +1 coz the array stores totalCost as well
 
         for (int r = 0; r < supply.length; r++) {
             for (int c = 0; c < demand.length; c++) {
@@ -202,13 +203,19 @@ public class CPMAlgorithm {
                 Shipment s = matrix[r][c];
                 if (s != null && s.r == r && s.c == c) {
                     System.out.printf(" %3s ", (int) s.quantity);
+                    result[r][c] = (int) s.quantity;
                     totalCosts += (s.quantity * s.costPerUnit);
-                } else
+                } else{
                     System.out.printf("  -  ");
+                    result[r][c] = 0;
+                }
+
             }
             System.out.println();
         }
         System.out.printf("%nTotal costs: %s%n%n", totalCosts);
+        result[supply.length][0] = (int) totalCosts;
+        return result;
     }
 
     static void algTP() {
@@ -271,16 +278,12 @@ public class CPMAlgorithm {
     }
 
 
-    public void runTP() {
+    public int[][] runTP() {
 
         northWestCornerRule();
         algTP(); // !!!!!! experiment with number of calling steppingStone()
-        printResult("myfile.txt");
+        return printResult("myfile.txt");
 
-
-//        northWestCornerRule();
-//        steppingStone();
-//        printResult("myfile.txt");
         /*
         // Step 0: check if there are nodes/activities with 0 next
         if (!tasks.get(tasks.size()-1).getName().equals("")) {
