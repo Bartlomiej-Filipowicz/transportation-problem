@@ -211,6 +211,36 @@ public class CPMAlgorithm {
         System.out.printf("%nTotal costs: %s%n%n", totalCosts);
     }
 
+    static void algTP() {
+        double prevTotalCosts = -1;
+        double totalCosts = 0;
+
+        while(prevTotalCosts != totalCosts){
+
+            steppingStone();
+
+            for (int r = 0; r < supply.length; r++) {
+                for (int c = 0; c < demand.length; c++) {
+
+                    Shipment s = matrix[r][c];
+                    if (s != null && s.r == r && s.c == c) {
+                        //System.out.printf(" %3s ", (int) s.quantity);
+                        totalCosts += (s.quantity * s.costPerUnit);
+                    } //else
+                        //System.out.printf("  -  ");
+                }
+                //System.out.println();
+            }
+            //System.out.printf("%nTotal costs: %s%n%n", totalCosts);
+            if(totalCosts != prevTotalCosts){
+                prevTotalCosts = totalCosts;
+                totalCosts = 0;
+            }
+        }
+
+
+    }
+
     public CPMAlgorithm() {
         /*
         this.earliestStart = new int[numTasks+1]; // to wpisuje
@@ -243,116 +273,11 @@ public class CPMAlgorithm {
 
     public void runTP() {
 
-        int rowNum = podaz.size(); // it's equivalent to costs array size
-        int colNum = popyt.size(); // it's equivalent to costs array size
-        int minim,colStart = 0;
-        ArrayList<ArrayList<Integer>> northWestTable = new ArrayList<ArrayList<Integer>>();
-        ArrayList<ArrayList<Boolean>> onPath = new ArrayList<ArrayList<Boolean>>();
-        ArrayList<Integer> u = new ArrayList<Integer>(); // u -> w pionie
-        ArrayList<Integer> v = new ArrayList<Integer>(); // v -> w poziomie
-        ArrayList<ArrayList<Integer>> delta = new ArrayList<ArrayList<Integer>>();
-
         northWestCornerRule();
-        steppingStone();
-        steppingStone(); // !!!!!! experiment with number of calling steppingStone()
+        algTP(); // !!!!!! experiment with number of calling steppingStone()
         printResult("myfile.txt");
 
-        for(int i = 0; i < rowNum; i++){
-            northWestTable.add(new ArrayList<Integer>());
-            for(int j = 0; j < colNum; j++) northWestTable.get(i).add(0);
-        }
 
-        for(int i = 0; i < rowNum; i++){
-            onPath.add(new ArrayList<Boolean>());
-            for(int j = 0; j < colNum; j++) onPath.get(i).add(false);
-        }
-
-        for(int i = 0; i < rowNum; i++){
-            delta.add(new ArrayList<Integer>());
-            for(int j = 0; j < colNum; j++) delta.get(i).add(Integer.MIN_VALUE);
-        }
-
-        for(int i = 0; i < rowNum; i++){
-            for(int j = colStart; j < colNum; j++){
-                minim = Math.min(podaz.get(i),popyt.get(j));
-                podaz.set(i,podaz.get(i)-minim);
-                popyt.set(j,popyt.get(j)-minim);
-                northWestTable.get(i).set(j,minim);
-                onPath.get(i).set(j,true);
-
-                if(podaz.get(i) == 0){
-                    colStart = j;
-                    break;
-                }
-            }
-        }
-        //System.out.println(northWestTable);
-        u.add(0);
-        for(int i = 0; i < rowNum; i++){
-            for(int j = 0; j < colNum; j++)
-                if(onPath.get(i).get(j)){
-                    if(u.size() == i + 1){
-                        v.add(mycosts.get(i).get(j) - u.get(i));
-                    }
-                    else{
-                        u.add(mycosts.get(i).get(j) - v.get(j));
-                    }
-                }
-        }
-//        System.out.println(u);
-//        System.out.println(v);
-
-        for(int i = 0; i < rowNum; i++){
-            for(int j = 0; j < colNum; j++)
-                if(!onPath.get(i).get(j)){
-                    delta.get(i).set(j, u.get(i) + v.get(j) - mycosts.get(i).get(j));
-                }
-        }
-       // System.out.println(delta);
-        int maks_delta = Integer.MIN_VALUE;
-        int pos_i = 0, pos_j = 0;
-        for(int i = 0; i < rowNum; i++){
-            for(int j = 0; j < colNum; j++){
-                if(delta.get(i).get(j) > maks_delta){
-                    maks_delta = delta.get(i).get(j);
-                    pos_i = i;
-                    pos_j = j;
-                }
-            }
-        }
-//        System.out.println(maks_delta);
-//        System.out.println(pos_i + "  " + pos_j);
-        if(maks_delta <= 0){
-            // the optimal solution found
-            return;
-        }
-        int start_up = -1; // starting position of a cycle in upper direction
-        // looking for a cycle in 4 directions:
-        // UP
-        for(int i = pos_i; i >= 0; i--){
-            if(onPath.get(i).get(pos_j)){
-                start_up = i;
-                break;
-            }
-        }
-        if(start_up >= 0){
-            int counter = 1; // odd & even inside a cycle
-            int i_loc = start_up, j_loc = pos_j; // iterators
-            int min_even = Integer.MAX_VALUE;
-            while (true){
-
-                counter++;
-                if(counter%2 == 0){
-                    min_even = Math.min(min_even, northWestTable.get(i_loc).get(j_loc));
-                }
-                if(onPath.get(i_loc + 1).get(j_loc)) i_loc += 1;
-                else j_loc += 1;
-                break; // <-- delete
-            }
-        }
-        else{
-            //code
-        }
 //        northWestCornerRule();
 //        steppingStone();
 //        printResult("myfile.txt");
